@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+<title>Setup Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column of setup cards (chart, levels, take/skip, reason) under a sticky progress bar */
+:root {
+  --bg: #f4f5f8; --surface: #ffffff; --fg: #1d2230; --muted: #5d6578; --line: #dde1ea;
+  --accent: #5a3fb0; --accent-soft: #ece7fa;
+  --take: #1f8a6a; --take-soft: #e2f4ee; --skip: #b8433d; --skip-soft: #fbe9e8;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12141b; --surface: #1b1e28; --fg: #e6e8ef; --muted: #9aa1b2; --line: #2c3040;
+  --accent: #a893f0; --accent-soft: #2a2442; --take: #4fc79f; --take-soft: #16332a; --skip: #ef7b74; --skip-soft: #3a1d1c; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12141b; --surface: #1b1e28; --fg: #e6e8ef; --muted: #9aa1b2; --line: #2c3040;
+  --accent: #a893f0; --accent-soft: #2a2442; --take: #4fc79f; --take-soft: #16332a; --skip: #ef7b74; --skip-soft: #3a1d1c; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 64px; display: grid; gap: 20px; }
+h1 { font-size: 1.6rem; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+.intro { display: grid; gap: 8px; max-width: 68ch; color: var(--muted); }
+.intro p { margin: 0; }
+.intro strong { color: var(--fg); }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; border-bottom: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.progress { display: flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; }
+.meter { width: 160px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+button { font: inherit; cursor: pointer; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 6px 12px; }
+button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.status { font-size: 0.85rem; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: grid; }
+.card.take { border-color: var(--take); }
+.card.skip { border-color: var(--skip); }
+.head { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.head .id { font-family: var(--mono); color: var(--muted); font-size: 0.85rem; }
+.head .pair { font-weight: 600; font-size: 1.05rem; }
+.pill { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; }
+.pill.buy { background: var(--take-soft); color: var(--take); }
+.pill.sell { background: var(--skip-soft); color: var(--skip); }
+.head .meta { color: var(--muted); font-size: 0.88rem; }
+.chart { width: 100%; display: block; background: #fff; }
+.levels { display: flex; flex-wrap: wrap; gap: 6px 20px; padding: 10px 16px; font-family: var(--mono); font-size: 0.85rem; font-variant-numeric: tabular-nums; border-top: 1px solid var(--line); }
+.levels span b { font-family: var(--sans); font-weight: 500; color: var(--muted); margin-right: 6px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.decide { display: grid; grid-template-columns: auto 1fr; gap: 12px; padding: 12px 16px 16px; align-items: start; border-top: 1px solid var(--line); }
+@media (max-width: 560px) { .decide { grid-template-columns: 1fr; } }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; padding: 8px 18px; font-weight: 600; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"].t { background: var(--take); color: var(--surface); }
+.seg button[aria-pressed="true"].s { background: var(--skip); color: var(--surface); }
+textarea { font: inherit; font-size: 0.92rem; width: 100%; min-width: 0; box-sizing: border-box; min-height: 42px; resize: vertical; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: var(--bg); color: var(--fg); }
+.empty { color: var(--muted); padding: 24px; text-align: center; }
+.copybox { white-space: pre-wrap; font-family: var(--mono); font-size: 0.8rem; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; max-height: 240px; overflow: auto; }
+@media (prefers-reduced-motion: reduce) { .meter i { transition: none; } }
+</style>
+</head><body>
+
+
+<div class="wrap">
+  <header class="intro">
+    <h1>Setup Review</h1>
+    <p>These are <strong>30 setups the J1 code found</strong> on gold, EURUSD and GBPUSD between 1 Sep and 9 Oct 2026. Each chart stops at the moment the setup triggered, so you can't see what happened next.</p>
+    <p>For each one, choose <strong>Take</strong> or <strong>Skip</strong>, the way you would in live trading, and write one line on why. Examples: "no displacement", "sweep too small", "against the 4H", "wrong session", "good OB". Your reasons are what we'll code.</p>
+    <p><strong>When you're done, tap Send answers on WhatsApp.</strong> WhatsApp opens with your answers typed in; pick Hazz and send. If that doesn't open, use Copy my answers and paste them into the chat.</p>
+    <p>Times are in your TradingView time (UTC+2). The left chart is context with the zone that was tapped. The right chart is the entry timeframe, showing the CHoCH, the sweep, and the code's entry, stop and target.</p>
+  </header>
+
+  <div class="bar">
+    <div class="progress"><span class="meter"><i id="meter"></i></span><span id="count">0 of 30 marked</span></div>
+    <div class="tools">
+      <button id="filter" type="button" aria-pressed="false">Show unmarked only</button>
+      <button id="wa" type="button" class="primary">Send answers on WhatsApp</button>
+      <button id="copy" type="button">Copy my answers</button>
+    </div>
+    <div class="status" id="status">Loading…</div>
+  </div>
+
+  <div id="copyout" hidden><p class="status">Copied. If copying didn't work, select the text below and paste it into WhatsApp.</p><div class="copybox" id="copytext"></div></div>
+
+  <main id="list"><p class="empty">Loading the 30 setups…</p></main>
+</div>
+
+<script>
+const LS = "j1-review-v1";
+let setups = [], marks = {}, db = null, uid = null, onlyOpen = false;
+const $ = (id) => document.getElementById(id);
+
+function loadLocal() { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch { return {}; } }
+function saveLocal() { try { localStorage.setItem(LS, JSON.stringify(marks)); } catch {} }
+
+function fmt(x, sym) { return sym === "XAUUSD" ? x.toFixed(2) : x.toFixed(5); }
+
+function card(s) {
+  const m = marks[s.id] || {};
+  const el = document.createElement("article");
+  el.className = "card" + (m.decision ? " " + m.decision : "");
+  el.id = "card-" + s.id;
+  el.innerHTML = `
+    <div class="head">
+      <span class="id">${s.id}</span>
+      <span class="pair">${s.symbol}</span>
+      <span class="pill ${s.side}">${s.side}</span>
+      <span class="meta">${s.time} · ${s.track.replace("->", "→")} · swept ${s.sweep}</span>
+    </div>
+    <img class="chart" loading="lazy" alt="${s.symbol} ${s.side} setup chart, ${s.time}" src="${s.chart}">
+    <div class="levels">
+      <span><b>Entry</b>${fmt(s.entry, s.symbol)}</span>
+      <span><b>Stop</b>${fmt(s.stop, s.symbol)}</span>
+      <span><b>Target</b>${fmt(s.target, s.symbol)}</span>
+      <span><b>R</b>1:${s.rr}</span>
+    </div>
+    <div class="decide">
+      <div class="seg" role="group" aria-label="Take or skip ${s.id}">
+        <button type="button" class="t" id="take-${s.id}" aria-pressed="${m.decision === "take"}">Take</button>
+        <button type="button" class="s" id="skip-${s.id}" aria-pressed="${m.decision === "skip"}">Skip</button>
+      </div>
+      <textarea id="why-${s.id}" placeholder="Why? One line is enough." aria-label="Reason for ${s.id}"></textarea>
+    </div>`;
+  el.querySelector("textarea").value = m.reason || "";
+  el.querySelector(".t").addEventListener("click", () => decide(s.id, "take"));
+  el.querySelector(".s").addEventListener("click", () => decide(s.id, "skip"));
+  const ta = el.querySelector("textarea");
+  let timer;
+  ta.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(() => setReason(s.id, ta.value), 800); });
+  ta.addEventListener("blur", () => { clearTimeout(timer); setReason(s.id, ta.value); });
+  return el;
+}
+
+function render() {
+  const list = $("list");
+  const shown = setups.filter((s) => !onlyOpen || !(marks[s.id] || {}).decision);
+  list.replaceChildren(...(shown.length ? shown.map(card) : [Object.assign(document.createElement("p"), { className: "empty", textContent: "All 30 are marked. Press Copy my answers if your marks aren't saving online." })]));
+  list.style.display = "grid"; list.style.gap = "20px";
+  progress();
+}
+
+function progress() {
+  const n = setups.filter((s) => (marks[s.id] || {}).decision).length;
+  $("count").textContent = `${n} of ${setups.length} marked`;
+  $("meter").style.width = (setups.length ? (100 * n / setups.length) : 0) + "%";
+}
+
+function refreshCard(id) {
+  const el = $("card-" + id); if (!el) return;
+  const m = marks[id] || {};
+  el.className = "card" + (m.decision ? " " + m.decision : "");
+  $("take-" + id).setAttribute("aria-pressed", String(m.decision === "take"));
+  $("skip-" + id).setAttribute("aria-pressed", String(m.decision === "skip"));
+}
+
+async function persist(id) {
+  saveLocal();
+  if (!db || !uid) return;
+  const m = marks[id];
+  try {
+    await db.collection("reviews").doc(uid + "__" + id).set({ setup: id, by: uid, decision: m.decision || "", reason: m.reason || "", at: new Date().toISOString() });
+    $("status").textContent = "Saved online";
+  } catch (e) {
+    $("status").textContent = "Saved on this device only. Use Copy my answers to send them.";
+  }
+}
+
+function decide(id, d) {
+  marks[id] = { ...(marks[id] || {}), decision: d };
+  refreshCard(id); progress(); persist(id);
+}
+function setReason(id, text) {
+  if (((marks[id] || {}).reason || "") === text) return;
+  marks[id] = { ...(marks[id] || {}), reason: text };
+  persist(id);
+}
+
+$("filter").addEventListener("click", (e) => {
+  onlyOpen = !onlyOpen; e.currentTarget.setAttribute("aria-pressed", String(onlyOpen));
+  e.currentTarget.textContent = onlyOpen ? "Show all" : "Show unmarked only"; render();
+});
+
+function answersText() {
+  const lines = setups.map((s) => { const m = marks[s.id] || {}; return `${s.id} ${s.symbol} ${s.side} ${s.time}: ${(m.decision || "-").toUpperCase()}${m.reason ? " — " + m.reason : ""}`; });
+  return "J1 setup review\n" + lines.join("\n");
+}
+$("wa").addEventListener("click", () => {
+  document.activeElement && document.activeElement.blur();
+  const n = setups.filter((s) => (marks[s.id] || {}).decision).length;
+  if (n < setups.length) { $("status").textContent = `${setups.length - n} still unmarked. You can send now or finish them first; tap again to send anyway.`; if (!$("wa").dataset.warned) { $("wa").dataset.warned = "1"; return; } }
+  location.href = "https://wa.me/?text=" + encodeURIComponent(answersText());
+});
+$("copy").addEventListener("click", () => {
+  const lines = setups.map((s) => { const m = marks[s.id] || {}; return `${s.id} ${s.symbol} ${s.side} ${s.time}: ${(m.decision || "-").toUpperCase()}${m.reason ? " — " + m.reason : ""}`; });
+  const text = "J1 setup review\n" + lines.join("\n");
+  $("copytext").textContent = text; $("copyout").hidden = false;
+  const p = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject();
+  p.catch(() => { const r = document.createRange(); r.selectNodeContents($("copytext")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); });
+});
+
+async function start() {
+  marks = loadLocal();
+  try { setups = await (await fetch("setups.json")).json(); }
+  catch { $("list").innerHTML = '<p class="empty">The setups didn\'t load. Reload the page.</p>'; return; }
+  render();
+  $("status").textContent = "Saving on this device";
+  const use = window.claude && window.claude.use ? window.claude.use : async () => null;
+  const [dbNs, userNs] = await Promise.all([use("db"), use("user")]);
+  if (!dbNs || !userNs) { $("status").textContent = "Your marks are kept in this browser until you send them."; return; }
+  db = dbNs;
+  try { uid = await userNs.id(); } catch { uid = null; }
+  if (!uid) { $("status").textContent = "Saving on this device only. Use Copy my answers to send them."; return; }
+  db.collection("reviews").where("by", "==", uid).onSnapshot((snap) => {
+    let changed = false;
+    snap.docs.forEach((d) => {
+      const v = d.data() || {};
+      if (!v.setup) return;
+      const cur = marks[v.setup] || {};
+      if (cur.decision !== (v.decision || undefined) || (cur.reason || "") !== (v.reason || "")) {
+        marks[v.setup] = { decision: v.decision || cur.decision, reason: v.reason ?? cur.reason };
+        changed = true;
+      }
+    });
+    if (changed) { saveLocal(); render(); }
+    $("status").textContent = "Saving online";
+  }, () => { $("status").textContent = "Saving on this device only. Use Copy my answers to send them."; });
+}
+start();
+</script>
+
+</body></html>
